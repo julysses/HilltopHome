@@ -1,8 +1,7 @@
 # Hilltop Home Co.
 
 Marketing/lead-gen website for Hilltop Home Co., a DFW motivated-seller home-buying business.
-Built with Next.js (App Router) + Tailwind, backed by Supabase Edge Functions for lead intake
-and notification (Twilio SMS + email), per the project PRD.
+Built with Next.js (App Router) + Tailwind.
 
 ## Development
 
@@ -14,28 +13,31 @@ npm run lint
 npm run build
 ```
 
-Copy `.env.example` to `.env.local` and fill in the public values (Supabase project URL/anon
-key/functions URL, Meta Pixel ID, owner phone number) to enable form submission and Pixel
-tracking in a local build.
+Copy `.env.example` to `.env.local` and fill in the values (WholesaleOS API base URL, Meta
+Pixel ID/token, owner phone number) to enable form submission and Pixel tracking locally.
 
-## Backend (Supabase) — not yet deployed
+## Lead pipeline — WholesaleOS integration
 
-The `leads` table migration (`supabase/migrations/`) and both Edge Functions
-(`supabase/functions/website-lead-intake`, `supabase/functions/notify-new-lead`) are written and
-code-complete, but **have not been applied or deployed to any live project**. The likely target
-project (`wholesale-automation`, shared with the existing WholesaleOS CRM) was paused at build
-time, so its real `fb_leads` schema and any existing segment-tagging function couldn't be
-inspected — see the note at the top of the migration file.
+This site does not own any database or backend of its own. The "Get an Offer" form submits to
+`src/app/api/get-offer/route.ts`, a thin server-side proxy that:
 
-Follow-up steps before this goes live:
+1. Forwards the submission to **WholesaleOS** (`julysses/Wholesale-automation`), the business's
+   existing CRM/automation platform — specifically its live FastAPI endpoint
+   `POST {WHOLESALE_API_BASE}/api/forms/hilltop-home-co/submit`. WholesaleOS owns lead storage,
+   scoring, qualification, and SMS/email notifications from there.
+2. Fires the Meta Conversions API `Lead` event server-side (best-effort), using the same
+   `landing_page_url`/UTM data captured from the form.
+3. Returns WholesaleOS's response (including its configured `thank_you_message`) back to the
+   client for the confirmation screen.
 
-1. Restore the `wholesale-automation` Supabase project.
-2. Inspect its schema (`fb_leads`, `campaigns`, `ad_sets`, any existing segment-tagging function)
-   and reconcile with the migration's assumptions.
-3. Apply the migration: `supabase db push` (or the Supabase MCP `apply_migration` tool).
-4. Deploy both Edge Functions and set their secrets (see the `.env.example` file in each
-   function's directory) — `OWNER_PHONE_NUMBER`, `TEAM_ALERT_EMAIL`, `TWILIO_ACCOUNT_SID`,
-   `TWILIO_AUTH_TOKEN`, `TWILIO_FROM_NUMBER`, `RESEND_API_KEY`, `META_PIXEL_ID`,
-   `META_CONVERSIONS_API_TOKEN`.
-5. Configure a Supabase Database Webhook on `INSERT` to `leads` that calls `notify-new-lead`.
-6. Fill in the real values in `.env.local` / your hosting provider's env vars.
+The form's fields (`property_address`, `first_name`, `last_name`, `phone`, `email`,
+`motivation`, `timeline`, `condition`, `occupancy`, `asking_price`, `sms_opt_in` — see
+`src/lib/constants.ts`) intentionally match the field names/values WholesaleOS's
+`lead_form_configs`/scoring pipeline expects, so submissions score correctly with zero backend
+code changes. The corresponding `hilltop-home-co` form config, plus a WholesaleOS-side fix for
+real speed-to-lead SMS (confirmation to the seller + immediate owner alert on every lead), were
+added on a `feat/hilltop-home-co-integration` branch in the `Wholesale-automation` repo — that
+branch has not been merged/deployed and needs review before this form goes live in production.
+
+`WHOLESALE_API_BASE` defaults to `https://wholesale-automation.vercel.app` — the live WholesaleOS
+deployment.

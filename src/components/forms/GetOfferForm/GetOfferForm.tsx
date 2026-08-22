@@ -1,18 +1,17 @@
 "use client";
 
-import { Suspense, useReducer } from "react";
+import { Suspense, useReducer, useState } from "react";
 import { Button } from "@/components/ui/Button";
-import { websiteLeadIntakeUrl } from "@/lib/edgeFunctionUrl";
 import { SUBMIT_ERROR_MESSAGE } from "@/lib/constants";
 import { formReducer, initialFormState } from "./formReducer";
 import { useUtmCapture } from "./useUtmCapture";
 import { validateAll } from "./validation";
-import { toLeadPayload } from "./types";
+import { toSubmitPayload } from "./types";
 import { StepProgress } from "./StepProgress";
-import { StepAddress } from "./StepAddress";
-import { StepSituation } from "./StepSituation";
-import { StepTimeline } from "./StepTimeline";
-import { StepContact } from "./StepContact";
+import { StepAddressContact } from "./StepAddressContact";
+import { StepMotivationTimeline } from "./StepMotivationTimeline";
+import { StepConditionOccupancy } from "./StepConditionOccupancy";
+import { StepPriceConsent } from "./StepPriceConsent";
 import { ConfirmationState } from "./ConfirmationState";
 import { SubmitError } from "./SubmitError";
 
@@ -22,6 +21,7 @@ type GetOfferFormProps = {
 
 function GetOfferFormInner({ variant = "embedded" }: GetOfferFormProps) {
   const [state, dispatch] = useReducer(formReducer, initialFormState);
+  const [confirmationMessage, setConfirmationMessage] = useState<string>();
   useUtmCapture(dispatch);
 
   async function handleSubmit() {
@@ -32,31 +32,20 @@ function GetOfferFormInner({ variant = "embedded" }: GetOfferFormProps) {
     }
 
     dispatch({ type: "SUBMIT_START" });
-    const url = websiteLeadIntakeUrl();
-
-    if (!url) {
-      dispatch({
-        type: "SUBMIT_ERROR",
-        message: SUBMIT_ERROR_MESSAGE,
-      });
-      return;
-    }
 
     try {
-      const res = await fetch(url, {
+      const res = await fetch("/api/get-offer", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "",
-          Authorization: `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? ""}`,
-        },
-        body: JSON.stringify(toLeadPayload(state)),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(toSubmitPayload(state)),
       });
 
       if (!res.ok) {
         throw new Error(`Request failed with status ${res.status}`);
       }
 
+      const json = (await res.json()) as { message?: string };
+      setConfirmationMessage(json.message);
       dispatch({ type: "SUBMIT_SUCCESS" });
     } catch {
       dispatch({ type: "SUBMIT_ERROR", message: SUBMIT_ERROR_MESSAGE });
@@ -64,7 +53,7 @@ function GetOfferFormInner({ variant = "embedded" }: GetOfferFormProps) {
   }
 
   if (state.status === "success") {
-    return <ConfirmationState />;
+    return <ConfirmationState message={confirmationMessage} />;
   }
 
   return (
@@ -76,10 +65,10 @@ function GetOfferFormInner({ variant = "embedded" }: GetOfferFormProps) {
       )}
       <StepProgress step={state.step} />
 
-      {state.step === 1 && <StepAddress state={state} dispatch={dispatch} />}
-      {state.step === 2 && <StepSituation state={state} dispatch={dispatch} />}
-      {state.step === 3 && <StepTimeline state={state} dispatch={dispatch} />}
-      {state.step === 4 && <StepContact state={state} dispatch={dispatch} />}
+      {state.step === 1 && <StepAddressContact state={state} dispatch={dispatch} />}
+      {state.step === 2 && <StepMotivationTimeline state={state} dispatch={dispatch} />}
+      {state.step === 3 && <StepConditionOccupancy state={state} dispatch={dispatch} />}
+      {state.step === 4 && <StepPriceConsent state={state} dispatch={dispatch} />}
 
       {state.status === "error" && state.submitErrorMessage && (
         <div className="mt-4">

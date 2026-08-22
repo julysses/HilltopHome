@@ -1,4 +1,3 @@
-import type { ContactPreferenceValue } from "@/lib/constants";
 import type { FormState, StepId } from "./types";
 import { validateStep } from "./validation";
 
@@ -6,21 +5,21 @@ export const initialFormState: FormState = {
   step: 1,
   status: "editing",
   property_address: "",
-  situations: [],
-  timeline: "",
-  condition_notes: "",
-  name: "",
+  first_name: "",
+  last_name: "",
   phone: "",
   email: "",
-  contact_preference: [],
-  sms_consent: false,
+  motivation: "",
+  timeline: "",
+  condition: "",
+  occupancy: "",
+  asking_price: "",
+  sms_opt_in: false,
   errors: {},
 };
 
 export type FormAction =
   | { type: "SET_FIELD"; field: keyof FormState; value: FormState[keyof FormState] }
-  | { type: "TOGGLE_SITUATION"; value: string }
-  | { type: "TOGGLE_CONTACT_PREF"; value: ContactPreferenceValue }
   | {
       type: "SET_UTM";
       utm_source?: string;
@@ -42,22 +41,6 @@ export function formReducer(state: FormState, action: FormAction): FormState {
         [action.field]: action.value,
         errors: { ...state.errors, [action.field as string]: "" },
       };
-
-    case "TOGGLE_SITUATION": {
-      const has = state.situations.includes(action.value);
-      const situations = has
-        ? state.situations.filter((s) => s !== action.value)
-        : [...state.situations, action.value];
-      return { ...state, situations, errors: { ...state.errors, situations: "" } };
-    }
-
-    case "TOGGLE_CONTACT_PREF": {
-      const has = state.contact_preference.includes(action.value);
-      const contact_preference = has
-        ? state.contact_preference.filter((c) => c !== action.value)
-        : [...state.contact_preference, action.value];
-      return { ...state, contact_preference, errors: { ...state.errors, contact_preference: "" } };
-    }
 
     case "SET_UTM":
       return {

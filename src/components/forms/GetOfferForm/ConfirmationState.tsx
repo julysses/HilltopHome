@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { trackLeadEvent } from "@/components/analytics/trackLeadEvent";
 import { CONFIRMATION_MESSAGE } from "@/lib/constants";
 
-export function ConfirmationState() {
+export function ConfirmationState({ message }: { message?: string }) {
   useEffect(() => {
     trackLeadEvent();
   }, []);
@@ -17,7 +17,7 @@ export function ConfirmationState() {
       <h2 className="text-xl font-extrabold uppercase tracking-wide text-text">
         Thanks — We&apos;ve Got Your Info
       </h2>
-      <p className="max-w-sm text-text/70">{CONFIRMATION_MESSAGE}</p>
+      <p className="max-w-sm text-text/70">{message || CONFIRMATION_MESSAGE}</p>
     </div>
   );
 }

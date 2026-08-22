@@ -5,37 +5,43 @@ export function validateStep1(state: FormState): Record<string, string> {
   if (!state.property_address.trim()) {
     errors.property_address = "Property address is required.";
   }
-  return errors;
-}
-
-export function validateStep2(state: FormState): Record<string, string> {
-  const errors: Record<string, string> = {};
-  if (state.situations.length === 0) {
-    errors.situations = "Select at least one option.";
-  }
-  return errors;
-}
-
-export function validateStep3(state: FormState): Record<string, string> {
-  const errors: Record<string, string> = {};
-  if (!state.timeline) {
-    errors.timeline = "Please choose a timeline.";
-  }
-  return errors;
-}
-
-export function validateStep4(state: FormState): Record<string, string> {
-  const errors: Record<string, string> = {};
-  if (!state.name.trim()) {
-    errors.name = "Name is required.";
+  if (!state.first_name.trim()) {
+    errors.first_name = "First name is required.";
   }
   if (!state.phone.trim()) {
     errors.phone = "Phone number is required.";
   } else if (!/^[\d\s()+\-.]{7,20}$/.test(state.phone.trim())) {
     errors.phone = "Enter a valid phone number.";
   }
-  if (state.contact_preference.includes("Text") && !state.sms_consent) {
-    errors.sms_consent = "SMS consent is required to be contacted by text.";
+  return errors;
+}
+
+export function validateStep2(state: FormState): Record<string, string> {
+  const errors: Record<string, string> = {};
+  if (!state.motivation) {
+    errors.motivation = "Please select a reason.";
+  }
+  if (!state.timeline) {
+    errors.timeline = "Please choose a timeline.";
+  }
+  return errors;
+}
+
+export function validateStep3(state: FormState): Record<string, string> {
+  const errors: Record<string, string> = {};
+  if (!state.condition) {
+    errors.condition = "Please select a condition.";
+  }
+  if (!state.occupancy) {
+    errors.occupancy = "Please select occupancy status.";
+  }
+  return errors;
+}
+
+export function validateStep4(state: FormState): Record<string, string> {
+  const errors: Record<string, string> = {};
+  if (!state.sms_opt_in) {
+    errors.sms_opt_in = "SMS consent is required to submit this form.";
   }
   return errors;
 }
