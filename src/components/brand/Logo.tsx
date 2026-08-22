@@ -12,14 +12,9 @@ const SIZE_CLASSES: Record<NonNullable<LogoProps["variant"]>, string> = {
 };
 
 /**
- * v1 wordmark: a CSS/text recreation of the filed logo (crimson, all-caps,
- * wide tracking, no icon). The real vectorized SVG hasn't been added to the
- * repo yet.
- *
- * TODO(logo-swap): once /public/logo.svg (or similar) is added, replace the
- * <span> below with an <Image src="/logo.svg" .../> (or inline <svg>). Keep
- * this component's name and props identical so every call site (Header,
- * FooterFull, HeaderMinimal, FooterMinimal) needs no changes.
+ * The Hilltop Home Co. wordmark — crimson, bold all-caps, wide tracking, no
+ * icon. This CSS text rendering is the final logo treatment (confirmed
+ * against the brand reference), not a placeholder for a raster/vector file.
  */
 export function Logo({ variant = "header", className }: LogoProps) {
   return (
