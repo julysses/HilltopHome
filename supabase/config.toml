@@ -1,0 +1,5 @@
+[functions.website-lead-intake]
+verify_jwt = true
+
+[functions.notify-new-lead]
+verify_jwt = true
