@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { SITE_NAME } from "./constants";
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.hilltophomeco.com";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://hilltophome.co";
 
 export function pageMetadata(opts: {
   title: string;
