@@ -41,3 +41,51 @@ branch has not been merged/deployed and needs review before this form goes live 
 
 `WHOLESALE_API_BASE` defaults to `https://wholesale-automation.vercel.app` — the live WholesaleOS
 deployment.
+
+### Architecture diagram
+
+How a lead reaches the team, from either Facebook Ads or this website. Dashed red nodes are on
+the unmerged `feat/hilltop-home-co-integration` branch in `Wholesale-automation` — not yet live.
+
+```mermaid
+flowchart TD
+  subgraph FB["Meta Ads Manager"]
+    Campaign["Facebook / Instagram ad campaigns<br/>(Housing Special Ad Category)"]
+  end
+
+  subgraph Site["Hilltop Home Co. website (this repo)"]
+    Home["Home + /get-an-offer<br/>Get an Offer form"]
+    Proxy["/api/get-offer<br/>Meta Conversions API + forward"]
+  end
+
+  subgraph WOS["WholesaleOS — Wholesale-automation"]
+    LeadAdWebhook["/webhooks/facebook/lead<br/>(native Lead Ad intake)"]
+    Config[("hilltop-home-co<br/>lead_form_configs")]
+    Submit["POST /api/forms/hilltop-home-co/submit"]
+    Submissions[("lead_form_submissions")]
+    Leads[("leads")]
+    Score["Scoring +<br/>QualificationAgent + SellerScoreAgent"]
+    SMS["Speed-to-lead SMS<br/>seller confirm + owner alert<br/>(30-day dedup, DNC check)"]
+    Hot["HOT-lead escalation<br/>app_notifications + email"]
+  end
+
+  subgraph Rest["Rest of WholesaleOS"]
+    Downstream["AI calling · deal analysis<br/>· buyer matching"]
+  end
+
+  Campaign -->|native Lead Ad| LeadAdWebhook
+  Campaign -->|paid + organic click| Home
+  Home --> Proxy
+  Proxy --> Submit
+  Config -.->|read at submit time| Submit
+  LeadAdWebhook --> Leads
+  Submit --> Submissions
+  Submissions -->|background promotion| Leads
+  Leads --> Score
+  Score --> SMS
+  Score --> Hot
+  Leads --> Downstream
+
+  classDef pending stroke:#CE0435,stroke-width:2px,stroke-dasharray: 4 4
+  class Config,SMS,Hot pending
+```
