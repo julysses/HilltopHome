@@ -3,7 +3,7 @@ import { CONDITIONS, OCCUPANCIES } from "@/lib/constants";
 import type { FormAction } from "./formReducer";
 import type { FormState } from "./types";
 
-export function StepConditionOccupancy({
+export function ConditionOccupancySection({
   state,
   dispatch,
 }: {

@@ -63,6 +63,23 @@ export const OCCUPANCIES: { value: OccupancyValue; label: string }[] = [
   { value: "vacant", label: "No, it's vacant" },
 ];
 
+export type PriceRangeValue =
+  | "under_150k"
+  | "150k_250k"
+  | "250k_350k"
+  | "350k_500k"
+  | "500k_plus"
+  | "not_sure";
+
+export const PRICE_RANGES: { value: PriceRangeValue; label: string }[] = [
+  { value: "under_150k", label: "Under $150K" },
+  { value: "150k_250k", label: "$150K – $250K" },
+  { value: "250k_350k", label: "$250K – $350K" },
+  { value: "350k_500k", label: "$350K – $500K" },
+  { value: "500k_plus", label: "$500K+" },
+  { value: "not_sure", label: "Not sure" },
+];
+
 export const SMS_CONSENT_COPY =
   "By checking this box, I agree to receive text messages from Hilltop Home Co. about my property inquiry. Message and data rates may apply. Reply STOP to opt out.";
 

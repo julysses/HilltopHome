@@ -3,7 +3,7 @@ import { MOTIVATIONS, TIMELINES } from "@/lib/constants";
 import type { FormAction } from "./formReducer";
 import type { FormState } from "./types";
 
-export function StepMotivationTimeline({
+export function MotivationTimelineSection({
   state,
   dispatch,
 }: {

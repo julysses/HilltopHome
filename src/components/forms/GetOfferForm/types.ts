@@ -2,14 +2,13 @@ import type {
   ConditionValue,
   MotivationValue,
   OccupancyValue,
+  PriceRangeValue,
   TimelineValue,
 } from "@/lib/constants";
 
-export type StepId = 1 | 2 | 3 | 4;
 export type FormStatus = "editing" | "submitting" | "success" | "error";
 
 export type FormState = {
-  step: StepId;
   status: FormStatus;
 
   property_address: string;
@@ -17,6 +16,7 @@ export type FormState = {
   last_name: string;
   phone: string;
   email: string;
+  expected_range: PriceRangeValue | "";
 
   motivation: MotivationValue | "";
   timeline: TimelineValue | "";
@@ -24,7 +24,6 @@ export type FormState = {
   condition: ConditionValue | "";
   occupancy: OccupancyValue | "";
 
-  asking_price: string;
   sms_opt_in: boolean;
 
   utm_source?: string;
@@ -45,11 +44,11 @@ export type LeadAnswers = {
   last_name?: string;
   phone: string;
   email?: string;
+  expected_range?: PriceRangeValue;
   motivation: MotivationValue | "";
   timeline: TimelineValue | "";
   condition: ConditionValue | "";
   occupancy: OccupancyValue | "";
-  asking_price?: number;
   sms_opt_in: boolean;
 };
 
@@ -69,11 +68,11 @@ export function toSubmitPayload(state: FormState): GetOfferSubmitPayload {
       last_name: state.last_name || undefined,
       phone: state.phone,
       email: state.email || undefined,
+      expected_range: state.expected_range || undefined,
       motivation: state.motivation,
       timeline: state.timeline,
       condition: state.condition,
       occupancy: state.occupancy,
-      asking_price: state.asking_price ? Number(state.asking_price) : undefined,
       sms_opt_in: state.sms_opt_in,
     },
     utm_source: state.utm_source,

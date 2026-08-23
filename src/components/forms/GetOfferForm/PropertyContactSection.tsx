@@ -1,8 +1,10 @@
+import { RadioGroup } from "@/components/ui/RadioGroup";
 import { TextField } from "@/components/ui/TextField";
+import { PRICE_RANGES } from "@/lib/constants";
 import type { FormAction } from "./formReducer";
 import type { FormState } from "./types";
 
-export function StepAddressContact({
+export function PropertyContactSection({
   state,
   dispatch,
 }: {
@@ -56,6 +58,13 @@ export function StepAddressContact({
         value={state.email}
         onChange={(e) => dispatch({ type: "SET_FIELD", field: "email", value: e.target.value })}
         autoComplete="email"
+      />
+      <RadioGroup
+        name="expected_range"
+        legend="What price range are you expecting? (optional)"
+        options={PRICE_RANGES}
+        value={state.expected_range}
+        onChange={(value) => dispatch({ type: "SET_FIELD", field: "expected_range", value })}
       />
     </div>
   );

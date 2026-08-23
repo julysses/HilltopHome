@@ -1,6 +1,6 @@
 import type { FormState } from "./types";
 
-export function validateStep1(state: FormState): Record<string, string> {
+export function validatePropertyContact(state: FormState): Record<string, string> {
   const errors: Record<string, string> = {};
   if (!state.property_address.trim()) {
     errors.property_address = "Property address is required.";
@@ -16,7 +16,7 @@ export function validateStep1(state: FormState): Record<string, string> {
   return errors;
 }
 
-export function validateStep2(state: FormState): Record<string, string> {
+export function validateMotivationTimeline(state: FormState): Record<string, string> {
   const errors: Record<string, string> = {};
   if (!state.motivation) {
     errors.motivation = "Please select a reason.";
@@ -27,7 +27,7 @@ export function validateStep2(state: FormState): Record<string, string> {
   return errors;
 }
 
-export function validateStep3(state: FormState): Record<string, string> {
+export function validateConditionOccupancy(state: FormState): Record<string, string> {
   const errors: Record<string, string> = {};
   if (!state.condition) {
     errors.condition = "Please select a condition.";
@@ -38,7 +38,7 @@ export function validateStep3(state: FormState): Record<string, string> {
   return errors;
 }
 
-export function validateStep4(state: FormState): Record<string, string> {
+export function validateConsent(state: FormState): Record<string, string> {
   const errors: Record<string, string> = {};
   if (!state.sms_opt_in) {
     errors.sms_opt_in = "SMS consent is required to submit this form.";
@@ -46,26 +46,11 @@ export function validateStep4(state: FormState): Record<string, string> {
   return errors;
 }
 
-export function validateStep(step: FormState["step"], state: FormState): Record<string, string> {
-  switch (step) {
-    case 1:
-      return validateStep1(state);
-    case 2:
-      return validateStep2(state);
-    case 3:
-      return validateStep3(state);
-    case 4:
-      return validateStep4(state);
-    default:
-      return {};
-  }
-}
-
 export function validateAll(state: FormState): Record<string, string> {
   return {
-    ...validateStep1(state),
-    ...validateStep2(state),
-    ...validateStep3(state),
-    ...validateStep4(state),
+    ...validatePropertyContact(state),
+    ...validateMotivationTimeline(state),
+    ...validateConditionOccupancy(state),
+    ...validateConsent(state),
   };
 }

@@ -7,11 +7,10 @@ import { formReducer, initialFormState } from "./formReducer";
 import { useUtmCapture } from "./useUtmCapture";
 import { validateAll } from "./validation";
 import { toSubmitPayload } from "./types";
-import { StepProgress } from "./StepProgress";
-import { StepAddressContact } from "./StepAddressContact";
-import { StepMotivationTimeline } from "./StepMotivationTimeline";
-import { StepConditionOccupancy } from "./StepConditionOccupancy";
-import { StepPriceConsent } from "./StepPriceConsent";
+import { PropertyContactSection } from "./PropertyContactSection";
+import { MotivationTimelineSection } from "./MotivationTimelineSection";
+import { ConditionOccupancySection } from "./ConditionOccupancySection";
+import { ConsentSection } from "./ConsentSection";
 import { ConfirmationState } from "./ConfirmationState";
 import { SubmitError } from "./SubmitError";
 
@@ -27,7 +26,7 @@ function GetOfferFormInner({ variant = "embedded" }: GetOfferFormProps) {
   async function handleSubmit() {
     const errors = validateAll(state);
     if (Object.keys(errors).length > 0) {
-      dispatch({ type: "NEXT_STEP" }); // re-runs current step's validation to surface errors
+      dispatch({ type: "SET_ERRORS", errors });
       return;
     }
 
@@ -59,46 +58,36 @@ function GetOfferFormInner({ variant = "embedded" }: GetOfferFormProps) {
   return (
     <div className="mx-auto w-full max-w-xl rounded-lg border border-black/10 bg-white p-6 shadow-sm sm:p-8">
       {variant === "standalone" && (
-        <h1 className="mb-2 text-2xl font-extrabold uppercase tracking-wide text-text sm:text-3xl">
+        <h1 className="mb-6 text-2xl font-extrabold uppercase tracking-wide text-text sm:text-3xl">
           Get Your Cash Offer
         </h1>
       )}
-      <StepProgress step={state.step} />
 
-      {state.step === 1 && <StepAddressContact state={state} dispatch={dispatch} />}
-      {state.step === 2 && <StepMotivationTimeline state={state} dispatch={dispatch} />}
-      {state.step === 3 && <StepConditionOccupancy state={state} dispatch={dispatch} />}
-      {state.step === 4 && <StepPriceConsent state={state} dispatch={dispatch} />}
+      <div className="flex flex-col gap-8">
+        <PropertyContactSection state={state} dispatch={dispatch} />
+        <hr className="border-black/10" />
+        <MotivationTimelineSection state={state} dispatch={dispatch} />
+        <hr className="border-black/10" />
+        <ConditionOccupancySection state={state} dispatch={dispatch} />
+        <hr className="border-black/10" />
+        <ConsentSection state={state} dispatch={dispatch} />
+      </div>
 
       {state.status === "error" && state.submitErrorMessage && (
-        <div className="mt-4">
+        <div className="mt-6">
           <SubmitError message={state.submitErrorMessage} onRetry={handleSubmit} />
         </div>
       )}
 
-      <div className="mt-6 flex items-center justify-between gap-3">
-        {state.step > 1 ? (
-          <Button
-            type="button"
-            variant="ghost"
-            onClick={() => dispatch({ type: "PREV_STEP" })}
-            disabled={state.status === "submitting"}
-          >
-            Back
-          </Button>
-        ) : (
-          <span />
-        )}
-
-        {state.step < 4 ? (
-          <Button type="button" onClick={() => dispatch({ type: "NEXT_STEP" })}>
-            Continue
-          </Button>
-        ) : (
-          <Button type="button" onClick={handleSubmit} disabled={state.status === "submitting"}>
-            {state.status === "submitting" ? "Submitting..." : "Get My Offer"}
-          </Button>
-        )}
+      <div className="mt-8">
+        <Button
+          type="button"
+          onClick={handleSubmit}
+          disabled={state.status === "submitting"}
+          className="w-full"
+        >
+          {state.status === "submitting" ? "Submitting..." : "Get My Offer"}
+        </Button>
       </div>
     </div>
   );

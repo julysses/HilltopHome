@@ -1,19 +1,17 @@
-import type { FormState, StepId } from "./types";
-import { validateStep } from "./validation";
+import type { FormState } from "./types";
 
 export const initialFormState: FormState = {
-  step: 1,
   status: "editing",
   property_address: "",
   first_name: "",
   last_name: "",
   phone: "",
   email: "",
+  expected_range: "",
   motivation: "",
   timeline: "",
   condition: "",
   occupancy: "",
-  asking_price: "",
   sms_opt_in: false,
   errors: {},
 };
@@ -27,8 +25,7 @@ export type FormAction =
       utm_medium?: string;
       landing_page_url?: string;
     }
-  | { type: "NEXT_STEP" }
-  | { type: "PREV_STEP" }
+  | { type: "SET_ERRORS"; errors: Record<string, string> }
   | { type: "SUBMIT_START" }
   | { type: "SUBMIT_SUCCESS" }
   | { type: "SUBMIT_ERROR"; message: string };
@@ -51,19 +48,8 @@ export function formReducer(state: FormState, action: FormAction): FormState {
         landing_page_url: action.landing_page_url,
       };
 
-    case "NEXT_STEP": {
-      const errors = validateStep(state.step, state);
-      if (Object.keys(errors).length > 0) {
-        return { ...state, errors };
-      }
-      const nextStep = Math.min(state.step + 1, 4) as StepId;
-      return { ...state, step: nextStep, errors: {} };
-    }
-
-    case "PREV_STEP": {
-      const prevStep = Math.max(state.step - 1, 1) as StepId;
-      return { ...state, step: prevStep, errors: {} };
-    }
+    case "SET_ERRORS":
+      return { ...state, errors: action.errors };
 
     case "SUBMIT_START":
       return { ...state, status: "submitting" };
