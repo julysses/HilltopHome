@@ -3,6 +3,28 @@
 Marketing/lead-gen website for Hilltop Home Co., a DFW motivated-seller home-buying business.
 Built with Next.js (App Router) + Tailwind.
 
+## How the system fits together
+
+This site is one of four pieces of the overall lead-generation system: a paid ad campaign and an
+organic content plan both drive traffic (directly to WholesaleOS, or through this site), and every
+lead — however it arrives — ends up in WholesaleOS, the CRM that scores it, notifies the team, and
+carries it through the rest of the deal pipeline.
+
+```mermaid
+flowchart LR
+  Ads["Facebook Ad Campaign<br/>90-day paid campaign targeting<br/>motivated sellers in DFW"]
+  Organic["Organic Content Plan<br/>30-day plan building trust<br/>on the Facebook Page"]
+  Website["This Website<br/>Landing surface for paid + organic traffic,<br/>plus its own SEO/referral leads"]
+  WOS["WholesaleOS<br/>The CRM everything feeds into —<br/>scoring, notifications, deal pipeline"]
+
+  Ads -->|paid clicks| Website
+  Ads -->|native Lead Ads| WOS
+  Organic -.->|builds trust before/alongside paid spend| Website
+  Website -->|Get an Offer submissions| WOS
+```
+
+See "Architecture diagram" below for how a submission actually moves through the system.
+
 ## Development
 
 ```bash
