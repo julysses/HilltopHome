@@ -38,6 +38,37 @@ npm run build
 Copy `.env.example` to `.env.local` and fill in the values (WholesaleOS API base URL, Meta
 Pixel ID/token, owner phone number) to enable form submission and Pixel tracking locally.
 
+## Deploying (Netlify)
+
+This site is not purely static — `src/app/api/get-offer/route.ts` is a server-side Route Handler
+and `icon.tsx`/`apple-icon.tsx` code-generate the favicon via `next/og`. Netlify serves these
+through its official Next.js Runtime, declared in `netlify.toml`:
+
+```toml
+[build]
+  command = "npm run build"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+```
+
+To go live:
+
+1. In the Netlify dashboard: **Add new site → Import an existing project → GitHub** → select
+   `julysses/HilltopHome`, branch `claude/hilltop-home-website-3yc224`. The build command and
+   plugin are already configured via `netlify.toml` — no manual build settings needed.
+2. Set these environment variables under **Site settings → Environment variables** (same values
+   as `.env.example`):
+   - `NEXT_PUBLIC_SITE_URL` — `https://hilltophome.co`
+   - `WHOLESALE_API_BASE` — `https://wholesale-automation.vercel.app` (**required**, no code
+     fallback — the Get an Offer form won't have anywhere to submit to without it)
+   - `NEXT_PUBLIC_META_PIXEL_ID` / `META_CONVERSIONS_API_TOKEN` — optional, Pixel tracking no-ops
+     gracefully without them
+   - `NEXT_PUBLIC_OWNER_PHONE_DISPLAY` / `NEXT_PUBLIC_OWNER_PHONE_TEL` — optional, falls back to
+     the placeholder `(214) 555-0100`
+3. Attach the custom domain under **Site settings → Domain management → Add a domain** →
+   `hilltophome.co`, then add whatever DNS records Netlify's UI displays at your registrar.
+
 ## Lead pipeline — WholesaleOS integration
 
 This site does not own any database or backend of its own. The "Get an Offer" form submits to
@@ -53,7 +84,7 @@ This site does not own any database or backend of its own. The "Get an Offer" fo
    client for the confirmation screen.
 
 The form's fields (`property_address`, `first_name`, `last_name`, `phone`, `email`,
-`motivation`, `timeline`, `condition`, `occupancy`, `asking_price`, `sms_opt_in` — see
+`expected_range`, `motivation`, `timeline`, `condition`, `occupancy`, `sms_opt_in` — see
 `src/lib/constants.ts`) intentionally match the field names/values WholesaleOS's
 `lead_form_configs`/scoring pipeline expects, so submissions score correctly with zero backend
 code changes. The corresponding `hilltop-home-co` form config, plus a WholesaleOS-side fix for
