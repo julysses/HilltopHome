@@ -7,11 +7,11 @@ const config: Config = {
       colors: {
         primary: "#CE0435",
         background: "#FFFFFF",
-        text: "#1A1A1A",
-        "surface-subtle": "#F5F5F5",
+        text: "#14243B",
+        "surface-subtle": "#F1F4F8",
       },
       fontFamily: {
-        sans: ["var(--font-poppins)", "system-ui", "sans-serif"],
+        sans: ["var(--font-inter)", "system-ui", "sans-serif"],
       },
     },
   },
@@ -19,3 +19,4 @@ const config: Config = {
 };
 
 export default config;
+
