@@ -11,7 +11,7 @@ const config: Config = {
         "surface-subtle": "#F1F4F8",
       },
       fontFamily: {
-        sans: ["var(--font-poppins)", "system-ui", "sans-serif"],
+        sans: ["var(--font-inter)", "system-ui", "sans-serif"],
       },
     },
   },

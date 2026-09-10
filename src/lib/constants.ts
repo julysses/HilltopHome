@@ -7,8 +7,8 @@ export const OWNER_PHONE_TEL =
 
 export const NAV_LINKS = [
   { href: "/how-it-works", label: "How It Works" },
-  { href: "/faq", label: "FAQ" },
   { href: "/about", label: "About" },
+  { href: "/faq", label: "FAQ" },
 ] as const;
 
 export const FOOTER_LEGAL_LINKS = [
@@ -86,3 +86,4 @@ export const SMS_CONSENT_COPY =
 export const CONFIRMATION_MESSAGE = `Thanks — we'll be in touch shortly. If it's urgent, call/text us at ${OWNER_PHONE_DISPLAY}.`;
 
 export const SUBMIT_ERROR_MESSAGE = `Something went wrong sending your info. Please try again, or call/text us directly at ${OWNER_PHONE_DISPLAY}.`;
+

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Logo } from "@/components/brand/Logo";
 import { Button } from "@/components/ui/Button";
-import { NAV_LINKS, OWNER_PHONE_DISPLAY, OWNER_PHONE_TEL } from "@/lib/constants";
+import { NAV_LINKS } from "@/lib/constants";
 
 export function Header() {
   return (
@@ -20,12 +20,6 @@ export function Header() {
           ))}
         </nav>
         <div className="flex items-center gap-4">
-          <a
-            href={`tel:${OWNER_PHONE_TEL}`}
-            className="hidden text-sm font-semibold text-text hover:text-primary xl:block"
-          >
-            {OWNER_PHONE_DISPLAY}
-          </a>
           <Button href="/get-an-offer" className="px-3 py-2 text-sm sm:px-6 sm:py-3">
             Get an Offer
           </Button>
