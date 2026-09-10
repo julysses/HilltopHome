@@ -1,20 +1,9 @@
+import Image from "next/image";
+import Link from "next/link";
 import { Button } from "@/components/ui/Button";
-
 export function Hero() {
-  return (
-    <section className="bg-surface-subtle">
-      <div className="container-page flex flex-col items-center gap-6 py-16 text-center sm:py-24">
-        <h1 className="max-w-3xl text-3xl font-extrabold uppercase leading-tight tracking-wide text-text sm:text-5xl">
-          Sell Your DFW House <span className="text-primary">As-Is, For Cash</span>
-        </h1>
-        <p className="max-w-xl text-base text-text/70 sm:text-lg">
-          No repairs. No agent fees. No showings. Get a fair cash offer on your house and close
-          on your timeline — as fast as 7 days, or whenever works for you.
-        </p>
-        <Button href="#get-an-offer" className="text-base">
-          Get My Cash Offer
-        </Button>
-      </div>
-    </section>
-  );
+  return <section className="hilltop-hero"><div className="container-page hilltop-hero-grid">
+    <div className="hilltop-hero-copy"><p className="hilltop-eyebrow">Your local DFW home buyer</p><h1>Your house.<br />Your timeline.<br /><span>A fresh start.</span></h1><p className="hilltop-description">Sell your DFW house as-is, for cash. No repairs, no showings, and no pressure. Just a local team ready to help you move forward.</p><div className="hilltop-actions"><Button href="#get-an-offer">Get My Cash Offer</Button><Link href="/how-it-works">How it works</Link></div><p className="hilltop-reassurance">No obligation. No agent commissions.</p></div>
+    <div className="hilltop-photo"><Image src="/images/dfw-home.webp" alt="Welcoming brick house with a tree-shaded lawn" fill priority sizes="(max-width: 800px) 100vw, 45vw" className="object-cover" /><span className="hilltop-photo-mark" aria-hidden="true">H.</span><div className="hilltop-photo-caption"><strong>Home is personal.</strong><span>Selling it should feel that way, too.</span></div></div>
+  </div></section>;
 }

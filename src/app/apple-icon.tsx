@@ -19,9 +19,10 @@ export default function AppleIcon() {
           color: "#FFFFFF",
         }}
       >
-        H
+        H.
       </div>
     ),
     { ...size },
   );
 }
+

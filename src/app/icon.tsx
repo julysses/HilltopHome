@@ -3,8 +3,7 @@ import { ImageResponse } from "next/og";
 export const size = { width: 32, height: 32 };
 export const contentType = "image/png";
 
-// Placeholder mark until the real vectorized "H" monogram is available:
-// a crimson rounded square with a bold white "H".
+// Hilltop’s H. brand mark.
 export default function Icon() {
   return new ImageResponse(
     (
@@ -22,9 +21,10 @@ export default function Icon() {
           color: "#FFFFFF",
         }}
       >
-        H
+        H.
       </div>
     ),
     { ...size },
   );
 }
+

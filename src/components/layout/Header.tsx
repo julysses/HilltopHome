@@ -8,7 +8,7 @@ export function Header() {
     <header className="border-b border-black/10 bg-white">
       <div className="container-page flex h-16 items-center justify-between gap-4">
         <Logo variant="header" />
-        <nav className="hidden items-center gap-6 md:flex">
+        <nav className="hidden items-center gap-6 lg:flex">
           {NAV_LINKS.map((link) => (
             <Link
               key={link.href}
@@ -22,15 +22,20 @@ export function Header() {
         <div className="flex items-center gap-4">
           <a
             href={`tel:${OWNER_PHONE_TEL}`}
-            className="hidden text-sm font-semibold text-text hover:text-primary sm:block"
+            className="hidden text-sm font-semibold text-text hover:text-primary xl:block"
           >
             {OWNER_PHONE_DISPLAY}
           </a>
-          <Button href="/get-an-offer" className="px-4 py-2 text-xs sm:px-6 sm:py-3 sm:text-sm">
+          <Button href="/get-an-offer" className="px-3 py-2 text-sm sm:px-6 sm:py-3">
             Get an Offer
           </Button>
         </div>
       </div>
+      <details className="hilltop-mobile-nav lg:hidden">
+        <summary>Explore Hilltop</summary>
+        <nav aria-label="Mobile navigation">{NAV_LINKS.map((link) => <Link key={link.href} href={link.href}>{link.label}</Link>)}</nav>
+      </details>
     </header>
   );
 }
+
