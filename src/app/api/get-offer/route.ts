@@ -45,16 +45,20 @@ async function sha256Hex(value: string): Promise<string> {
 }
 
 export async function POST(request: Request) {
-  const base = process.env.WHOLESALE_API_BASE;
-  if (!base) {
-    return NextResponse.json({ success: false, error: "Server misconfigured" }, { status: 500 });
-  }
+  // This single-business site has a verified public CRM endpoint.
+  // Environment overrides remain available for isolated deployments.
+  const base = (process.env.WHOLESALE_API_BASE || "https://wholesale-automation.vercel.app").replace(/\/$/, "");
 
   let payload: GetOfferSubmitPayload;
   try {
     payload = await request.json();
   } catch {
     return NextResponse.json({ success: false, error: "Invalid JSON body" }, { status: 400 });
+  }
+
+  if (!payload || typeof payload !== "object" || !payload.answers ||
+      typeof payload.answers !== "object" || Array.isArray(payload.answers)) {
+    return NextResponse.json({ success: false, error: "Answers are required" }, { status: 400 });
   }
 
   // WholesaleOS's /api/forms/{slug}/submit only accepts answers + UTM fields —
@@ -73,6 +77,7 @@ export async function POST(request: Request) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(wholesaleBody),
+      signal: AbortSignal.timeout(30_000),
     });
   } catch {
     return NextResponse.json({ success: false, error: "Upstream request failed" }, { status: 502 });
@@ -85,11 +90,16 @@ export async function POST(request: Request) {
     );
   }
 
-  const upstreamJson = (await upstreamRes.json()) as {
-    success: boolean;
-    message?: string;
-    redirect_url?: string | null;
-  };
+  let upstreamJson: { success?: boolean; message?: string; redirect_url?: string | null };
+  try {
+    upstreamJson = await upstreamRes.json();
+    if (upstreamJson?.success !== true) throw new Error("Unconfirmed receipt");
+  } catch {
+    return NextResponse.json(
+      { success: false, error: "Unable to confirm submission. Please contact us before resubmitting." },
+      { status: 502 },
+    );
+  }
 
   // Best-effort — a Meta API failure must never block the lead response.
   sendMetaLeadEvent(payload).catch(() => {});

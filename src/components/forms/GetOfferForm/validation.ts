@@ -10,7 +10,7 @@ export function validatePropertyContact(state: FormState): Record<string, string
   }
   if (!state.phone.trim()) {
     errors.phone = "Phone number is required.";
-  } else if (!/^[\d\s()+\-.]{7,20}$/.test(state.phone.trim())) {
+  } else if (!/^1?\d{10}$/.test(state.phone.replace(/\D/g, ""))) {
     errors.phone = "Enter a valid phone number.";
   }
   return errors;
@@ -38,12 +38,9 @@ export function validateConditionOccupancy(state: FormState): Record<string, str
   return errors;
 }
 
-export function validateConsent(state: FormState): Record<string, string> {
-  const errors: Record<string, string> = {};
-  if (!state.sms_opt_in) {
-    errors.sms_opt_in = "SMS consent is required to submit this form.";
-  }
-  return errors;
+export function validateConsent(_state: FormState): Record<string, string> {
+  // Consent is optional; preserve false in the payload for personal follow-up.
+  return {};
 }
 
 export function validateAll(state: FormState): Record<string, string> {

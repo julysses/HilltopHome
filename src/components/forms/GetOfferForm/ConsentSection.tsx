@@ -19,6 +19,7 @@ export function ConsentSection({
         checked={state.sms_opt_in}
         onChange={(e) => dispatch({ type: "SET_FIELD", field: "sms_opt_in", value: e.target.checked })}
       />
+      <p className="text-sm text-text/70">Text messages are optional. You can request an offer without checking this box.</p>
       {state.errors.sms_opt_in && (
         <p className="text-xs font-semibold text-primary">{state.errors.sms_opt_in}</p>
       )}

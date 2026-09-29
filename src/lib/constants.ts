@@ -1,9 +1,9 @@
 export const SITE_NAME = "Hilltop Home Co.";
 
 export const OWNER_PHONE_DISPLAY =
-  process.env.NEXT_PUBLIC_OWNER_PHONE_DISPLAY ?? "(214) 555-0100";
+  process.env.NEXT_PUBLIC_OWNER_PHONE_DISPLAY ?? "(214) 701-0100";
 export const OWNER_PHONE_TEL =
-  process.env.NEXT_PUBLIC_OWNER_PHONE_TEL ?? "+12145550100";
+  process.env.NEXT_PUBLIC_OWNER_PHONE_TEL ?? "+12147010100";
 
 export const NAV_LINKS = [
   { href: "/how-it-works", label: "How It Works" },
