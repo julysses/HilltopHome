@@ -45,10 +45,9 @@ async function sha256Hex(value: string): Promise<string> {
 }
 
 export async function POST(request: Request) {
-  const base = process.env.WHOLESALE_API_BASE;
-  if (!base) {
-    return NextResponse.json({ success: false, error: "Server misconfigured" }, { status: 500 });
-  }
+  // This single-business site has a verified public CRM endpoint.
+  // Environment overrides remain available for isolated deployments.
+  const base = (process.env.WHOLESALE_API_BASE || "https://wholesale-automation.vercel.app").replace(/\/$/, "");
 
   let payload: GetOfferSubmitPayload;
   try {
