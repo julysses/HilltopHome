@@ -37,13 +37,15 @@ function GetOfferFormInner({ variant = "embedded" }: GetOfferFormProps) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(toSubmitPayload(state)),
+        signal: AbortSignal.timeout(40_000),
       });
 
       if (!res.ok) {
         throw new Error(`Request failed with status ${res.status}`);
       }
 
-      const json = (await res.json()) as { message?: string };
+      const json = (await res.json()) as { success?: boolean; message?: string };
+      if (json.success !== true) throw new Error("Submission was not accepted");
       setConfirmationMessage(json.message);
       dispatch({ type: "SUBMIT_SUCCESS" });
     } catch {

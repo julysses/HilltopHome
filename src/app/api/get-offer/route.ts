@@ -57,6 +57,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: false, error: "Invalid JSON body" }, { status: 400 });
   }
 
+  if (!payload || typeof payload !== "object" || !payload.answers ||
+      typeof payload.answers !== "object" || Array.isArray(payload.answers)) {
+    return NextResponse.json({ success: false, error: "Answers are required" }, { status: 400 });
+  }
+
   // WholesaleOS's /api/forms/{slug}/submit only accepts answers + UTM fields —
   // landing_page_url isn't part of its contract, so it's used here only for
   // the Meta Conversions API call below, not forwarded to WholesaleOS.
@@ -73,6 +78,7 @@ export async function POST(request: Request) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(wholesaleBody),
+      signal: AbortSignal.timeout(30_000),
     });
   } catch {
     return NextResponse.json({ success: false, error: "Upstream request failed" }, { status: 502 });
@@ -85,11 +91,16 @@ export async function POST(request: Request) {
     );
   }
 
-  const upstreamJson = (await upstreamRes.json()) as {
-    success: boolean;
-    message?: string;
-    redirect_url?: string | null;
-  };
+  let upstreamJson: { success?: boolean; message?: string; redirect_url?: string | null };
+  try {
+    upstreamJson = await upstreamRes.json();
+    if (upstreamJson?.success !== true) throw new Error("Unconfirmed receipt");
+  } catch {
+    return NextResponse.json(
+      { success: false, error: "Unable to confirm submission. Please contact us before resubmitting." },
+      { status: 502 },
+    );
+  }
 
   // Best-effort — a Meta API failure must never block the lead response.
   sendMetaLeadEvent(payload).catch(() => {});
