@@ -21,6 +21,19 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: false, error: "Answers are required" }, { status: 400 });
   }
 
+  if (payload.answers.sms_opt_in === true &&
+      (payload.answers.sms_consent_text !== SMS_CONSENT_COPY || payload.answers.sms_consent_version !== SMS_CONSENT_VERSION)) {
+    return NextResponse.json({ success: false, error: "The SMS disclosure has changed. Reload the page and review it before opting in." }, { status: 409 });
+  }
+  let consentSource: string | null = null;
+  try {
+    const source = new URL(payload.landing_page_url || "");
+    if (["https://hilltophome.co", "https://www.hilltophome.co"].includes(source.origin) &&
+        ["/", "/get-an-offer", "/get-an-offer/"].includes(source.pathname)) {
+      consentSource = source.origin + source.pathname;
+    }
+  } catch { /* Unknown source stays null rather than inventing evidence. */ }
+
   // Store the server-controlled disclosure with the durable CRM receipt.
   const wholesaleBody = {
     answers: {
@@ -29,7 +42,7 @@ export async function POST(request: Request) {
       sms_consent_text: SMS_CONSENT_COPY,
       sms_consent_version: SMS_CONSENT_VERSION,
       sms_consent_recorded_at: new Date().toISOString(),
-      sms_consent_source: "https://hilltophome.co/get-an-offer",
+      sms_consent_source: consentSource,
     },
     utm_source: payload.utm_source,
     utm_medium: payload.utm_medium,

@@ -1,3 +1,4 @@
+import { SMS_CONSENT_COPY, SMS_CONSENT_VERSION } from "../../../lib/constants";
 import type {
   ConditionValue,
   MotivationValue,
@@ -39,6 +40,8 @@ export type FormState = {
 // "hilltop-home-co" form schema exactly — the backend's scoring function
 // (_compute_scores_from_answers) reads answers by these keys.
 export type LeadAnswers = {
+  sms_consent_text?: string;
+  sms_consent_version?: string;
   property_address: string;
   first_name: string;
   last_name?: string;
@@ -74,6 +77,8 @@ export function toSubmitPayload(state: FormState): GetOfferSubmitPayload {
       condition: state.condition,
       occupancy: state.occupancy,
       sms_opt_in: state.sms_opt_in,
+      sms_consent_text: SMS_CONSENT_COPY,
+      sms_consent_version: SMS_CONSENT_VERSION,
     },
     utm_source: state.utm_source,
     utm_campaign: state.utm_campaign,

@@ -47,16 +47,24 @@ for (const choice of [true,false,'true']) {
  requests=[];
  const body=toSubmitPayload(state);
  body.answers.sms_opt_in=choice;
- body.answers.sms_consent_text='forged';
+ body.landing_page_url='https://hilltophome.co/?utm_source=test';
  assert.equal((await POST(request(body))).status,200);
  const answers=JSON.parse(requests[0].options.body).answers;
  assert.equal(answers.sms_opt_in,choice===true);
  assert.match(answers.sms_consent_text,/DBA of The Jays Dallas/);
  assert.notEqual(answers.sms_consent_text,'forged');
  assert.equal(answers.sms_consent_version,'2026-10-06');
- assert.equal(answers.sms_consent_source,'https://hilltophome.co/get-an-offer');
+ assert.equal(answers.sms_consent_source,'https://hilltophome.co/');
  assert.ok(!Number.isNaN(Date.parse(answers.sms_consent_recorded_at)));
  assert.equal(requests.length,1,'contact data must only be sent to CRM, even with Meta credentials');
 }
 globalThis.fetch=originalFetch;
 console.log('PASS: server disclosure evidence, strict boolean consent, no advertising transmission.');
+
+const stale=toSubmitPayload({...state,sms_opt_in:true});
+stale.answers.sms_consent_text='old disclosure';
+assert.equal((await POST(request(stale))).status,409);
+const staleVersion=toSubmitPayload({...state,sms_opt_in:true});
+staleVersion.answers.sms_consent_version='old';
+assert.equal((await POST(request(staleVersion))).status,409);
+console.log('PASS: stale rendered disclosure cannot be recorded as current consent.');
