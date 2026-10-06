@@ -1,48 +1,8 @@
 import { NextResponse } from "next/server";
+import { SMS_CONSENT_COPY, SMS_CONSENT_VERSION } from "../../../lib/constants";
 import type { GetOfferSubmitPayload } from "@/components/forms/GetOfferForm/types";
 
 const WHOLESALE_FORM_SLUG = "hilltop-home-co";
-
-async function sendMetaLeadEvent(payload: GetOfferSubmitPayload) {
-  const pixelId = process.env.NEXT_PUBLIC_META_PIXEL_ID;
-  const accessToken = process.env.META_CONVERSIONS_API_TOKEN;
-  if (!pixelId || !accessToken) return;
-
-  const phone = payload.answers.phone?.replace(/\D/g, "");
-  const email = payload.answers.email?.trim().toLowerCase();
-  const [hashedPhone, hashedEmail] = await Promise.all([
-    phone ? sha256Hex(phone) : Promise.resolve(undefined),
-    email ? sha256Hex(email) : Promise.resolve(undefined),
-  ]);
-
-  const url = `https://graph.facebook.com/v19.0/${pixelId}/events?access_token=${accessToken}`;
-  await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      data: [
-        {
-          event_name: "Lead",
-          event_time: Math.floor(Date.now() / 1000),
-          action_source: "website",
-          event_source_url: payload.landing_page_url,
-          user_data: {
-            ...(hashedPhone ? { ph: [hashedPhone] } : {}),
-            ...(hashedEmail ? { em: [hashedEmail] } : {}),
-          },
-        },
-      ],
-    }),
-  });
-}
-
-async function sha256Hex(value: string): Promise<string> {
-  const bytes = new TextEncoder().encode(value);
-  const digest = await crypto.subtle.digest("SHA-256", bytes);
-  return Array.from(new Uint8Array(digest))
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
-}
 
 export async function POST(request: Request) {
   // This single-business site has a verified public CRM endpoint.
@@ -61,11 +21,16 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: false, error: "Answers are required" }, { status: 400 });
   }
 
-  // WholesaleOS's /api/forms/{slug}/submit only accepts answers + UTM fields —
-  // landing_page_url isn't part of its contract, so it's used here only for
-  // the Meta Conversions API call below, not forwarded to WholesaleOS.
+  // Store the server-controlled disclosure with the durable CRM receipt.
   const wholesaleBody = {
-    answers: payload.answers,
+    answers: {
+      ...payload.answers,
+      sms_opt_in: payload.answers.sms_opt_in === true,
+      sms_consent_text: SMS_CONSENT_COPY,
+      sms_consent_version: SMS_CONSENT_VERSION,
+      sms_consent_recorded_at: new Date().toISOString(),
+      sms_consent_source: "https://hilltophome.co/get-an-offer",
+    },
     utm_source: payload.utm_source,
     utm_medium: payload.utm_medium,
     utm_campaign: payload.utm_campaign,
@@ -101,8 +66,7 @@ export async function POST(request: Request) {
     );
   }
 
-  // Best-effort — a Meta API failure must never block the lead response.
-  sendMetaLeadEvent(payload).catch(() => {});
+  // Do not send intake contact details or SMS consent to advertising providers.
 
   return NextResponse.json({
     success: upstreamJson.success,

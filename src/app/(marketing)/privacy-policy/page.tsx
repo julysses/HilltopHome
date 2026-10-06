@@ -13,9 +13,10 @@ export default function PrivacyPolicyPage() {
       <h1 className="mb-2 text-3xl font-extrabold uppercase tracking-wide text-text sm:text-4xl">
         Privacy Policy
       </h1>
-      <p className="mb-10 text-sm text-text/50">Effective Date: January 1, 2026</p>
+      <p className="mb-10 text-sm text-text/50">Effective Date: October 6, 2026</p>
 
       <div className="mx-auto flex max-w-2xl flex-col gap-8 text-text/80">
+        <p>Hilltop Home Co. is a DBA of The Jays Dallas, LLC.</p>
         <section>
           <h2 className="mb-2 text-lg font-bold text-text">Information We Collect</h2>
           <p>
@@ -23,7 +24,7 @@ export default function PrivacyPolicyPage() {
             including your name, phone number, email address (if given), property address,
             details about your situation and timeline, and any notes about the property&apos;s
             condition. We also collect technical information such as the page you submitted the
-            form from and UTM/campaign parameters, to understand how visitors find our site.
+            form from and UTM/campaign parameters, to understand how visitors find our site. We retain your SMS choice, the disclosure version and text, source form URL and receipt time.
           </p>
         </section>
         <section>
@@ -38,15 +39,17 @@ export default function PrivacyPolicyPage() {
           <h2 className="mb-2 text-lg font-bold text-text">Who We Share It With</h2>
           <p>
             We share information with service providers who help us operate, including Twilio
-            (for SMS and call delivery), our email delivery provider, and Meta/Facebook (for
-            advertising measurement, in hashed or aggregated form where applicable). We do not
-            sell your personal information to third parties.
+            (for SMS and call delivery) and our email delivery provider. Mobile information,
+            SMS opt-in data and consent are not sold or shared with third parties or affiliates
+            for marketing or promotional purposes. Messaging service providers may process
+            them only to operate the program. We do not send form contact details or SMS
+            consent to advertising providers.
           </p>
         </section>
         <section>
           <h2 className="mb-2 text-lg font-bold text-text">SMS Communications &amp; Opt-Out</h2>
           <p>
-            If you consent to receive text messages, message and data rates may apply. You can
+            The optional checkbox enrolls you in Hilltop Home Co. Property Inquiry Updates: recurring automated texts about your inquiry, offers, appointments and closing. Message frequency varies. Message and data rates may apply. Consent is not a condition of purchase or receiving an offer. SMS consent does not authorize AI calls or unrelated marketing. You can
             opt out at any time by replying STOP to any message. Reply HELP for assistance.
           </p>
         </section>

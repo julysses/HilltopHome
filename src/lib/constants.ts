@@ -81,9 +81,11 @@ export const PRICE_RANGES: { value: PriceRangeValue; label: string }[] = [
 ];
 
 export const SMS_CONSENT_COPY =
-  "By checking this box, I agree to receive text messages from Hilltop Home Co. about my property inquiry. Message and data rates may apply. Reply STOP to opt out.";
+  "By checking this optional box, I agree to receive recurring automated text messages from Hilltop Home Co., a DBA of The Jays Dallas, LLC, about my property inquiry, offer updates, appointment reminders and closing updates. Message frequency varies. Message and data rates may apply. Reply STOP to opt out or HELP for help. Consent is not a condition of purchase or receiving an offer.";
 
 export const CONFIRMATION_MESSAGE = `Thanks — we'll be in touch shortly. If it's urgent, call/text us at ${OWNER_PHONE_DISPLAY}.`;
 
 export const SUBMIT_ERROR_MESSAGE = `Something went wrong sending your info. Please try again, or call/text us directly at ${OWNER_PHONE_DISPLAY}.`;
 
+
+export const SMS_CONSENT_VERSION = "2026-10-06";

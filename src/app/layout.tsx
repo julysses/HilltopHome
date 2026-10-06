@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import { MetaPixelBase } from "@/components/analytics/MetaPixelBase";
-import { MetaPixelPageviewTracker } from "@/components/analytics/MetaPixelPageviewTracker";
 import { SITE_NAME } from "@/lib/constants";
 import { SITE_URL_BASE } from "@/lib/seo";
 import "./globals.css";
@@ -27,8 +25,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={inter.variable}>
       <body>
-        <MetaPixelBase />
-        <MetaPixelPageviewTracker />
         {children}
       </body>
     </html>

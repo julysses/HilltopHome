@@ -1,13 +1,8 @@
 "use client";
 
-import { useEffect } from "react";
-import { trackLeadEvent } from "@/components/analytics/trackLeadEvent";
 import { CONFIRMATION_MESSAGE } from "@/lib/constants";
 
 export function ConfirmationState({ message }: { message?: string }) {
-  useEffect(() => {
-    trackLeadEvent();
-  }, []);
 
   return (
     <div className="flex flex-col items-center gap-3 py-8 text-center">
