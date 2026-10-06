@@ -1,11 +1,14 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import pathModule from 'node:path';
 import ts from 'typescript';
 import {createRequire} from 'node:module';
 const require = createRequire(import.meta.url);
 function load(path) {
  const source=ts.transpileModule(fs.readFileSync(path,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS}}).outputText;
- const exports={};new Function('exports','require',source)(exports,require);return exports;
+ const exports={};
+ const localRequire=id=>id.startsWith('.') ? load(pathModule.resolve(pathModule.dirname(path),id)+'.ts') : require(id);
+ new Function('exports','require',source)(exports,localRequire);return exports;
 }
 const {validateAll}=load('src/components/forms/GetOfferForm/validation.ts');
 const {toSubmitPayload}=load('src/components/forms/GetOfferForm/types.ts');
@@ -35,3 +38,25 @@ globalThis.fetch=async()=>new Response(JSON.stringify({success:false}),{status:2
 assert.equal((await POST(request(toSubmitPayload(state)))).status,502);
 globalThis.fetch=originalFetch;
 console.log('PASS: missing deployment override uses verified CRM; invalid body and unconfirmed receipt cannot report success.');
+
+let requests=[];
+process.env.NEXT_PUBLIC_META_PIXEL_ID='test';
+process.env.META_CONVERSIONS_API_TOKEN='test';
+globalThis.fetch=async(url,options)=>{requests.push({url,options});return new Response(JSON.stringify({success:true}),{status:200});};
+for (const choice of [true,false,'true']) {
+ requests=[];
+ const body=toSubmitPayload(state);
+ body.answers.sms_opt_in=choice;
+ body.answers.sms_consent_text='forged';
+ assert.equal((await POST(request(body))).status,200);
+ const answers=JSON.parse(requests[0].options.body).answers;
+ assert.equal(answers.sms_opt_in,choice===true);
+ assert.match(answers.sms_consent_text,/DBA of The Jays Dallas/);
+ assert.notEqual(answers.sms_consent_text,'forged');
+ assert.equal(answers.sms_consent_version,'2026-10-06');
+ assert.equal(answers.sms_consent_source,'https://hilltophome.co/get-an-offer');
+ assert.ok(!Number.isNaN(Date.parse(answers.sms_consent_recorded_at)));
+ assert.equal(requests.length,1,'contact data must only be sent to CRM, even with Meta credentials');
+}
+globalThis.fetch=originalFetch;
+console.log('PASS: server disclosure evidence, strict boolean consent, no advertising transmission.');
