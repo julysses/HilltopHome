@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import localFont from "next/font/local";
 import { SITE_NAME } from "@/lib/constants";
 import { SITE_URL_BASE } from "@/lib/seo";
 import "./globals.css";
 
-const inter = Inter({
-  subsets: ["latin"],
-  weight: ["400", "500", "700", "800"],
+const inter = localFont({
+  src: "./fonts/Inter-latin.woff2",
+  weight: "400 800",
+  style: "normal",
   variable: "--font-inter",
   display: "swap",
 });
@@ -30,4 +31,3 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     </html>
   );
 }
-
