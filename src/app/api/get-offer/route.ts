@@ -3,6 +3,7 @@ import { SMS_CONSENT_COPY, SMS_CONSENT_VERSION } from "../../../lib/constants";
 import type { GetOfferSubmitPayload } from "@/components/forms/GetOfferForm/types";
 
 const WHOLESALE_FORM_SLUG = "hilltop-home-co";
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export async function POST(request: Request) {
   // This single-business site has a verified public CRM endpoint.
@@ -25,6 +26,9 @@ export async function POST(request: Request) {
       (payload.answers.sms_consent_text !== SMS_CONSENT_COPY || payload.answers.sms_consent_version !== SMS_CONSENT_VERSION)) {
     return NextResponse.json({ success: false, error: "The SMS disclosure has changed. Reload the page and review it before opting in." }, { status: 409 });
   }
+  if (typeof payload.request_id !== "string" || !UUID_PATTERN.test(payload.request_id)) {
+    return NextResponse.json({ success: false, error: "Please reload the form before submitting." }, { status: 400 });
+  }
   let consentSource: string | null = null;
   try {
     const source = new URL(payload.landing_page_url || "");
@@ -36,6 +40,7 @@ export async function POST(request: Request) {
 
   // Store the server-controlled disclosure with the durable CRM receipt.
   const wholesaleBody = {
+    request_id: payload.request_id,
     answers: {
       ...payload.answers,
       sms_opt_in: payload.answers.sms_opt_in === true,
@@ -68,10 +73,10 @@ export async function POST(request: Request) {
     );
   }
 
-  let upstreamJson: { success?: boolean; message?: string; redirect_url?: string | null };
+  let upstreamJson: { success?: boolean; submission_id?: string; processing_status?: string; message?: string; redirect_url?: string | null };
   try {
     upstreamJson = await upstreamRes.json();
-    if (upstreamJson?.success !== true) throw new Error("Unconfirmed receipt");
+    if (upstreamJson?.success !== true || upstreamJson.submission_id !== payload.request_id || upstreamJson.processing_status !== "processed") throw new Error("Unconfirmed receipt");
   } catch {
     return NextResponse.json(
       { success: false, error: "Unable to confirm submission. Please contact us before resubmitting." },
@@ -83,6 +88,8 @@ export async function POST(request: Request) {
 
   return NextResponse.json({
     success: upstreamJson.success,
+    submission_id: upstreamJson.submission_id,
+    processing_status: upstreamJson.processing_status,
     message: upstreamJson.message,
     redirect_url: upstreamJson.redirect_url,
   });

@@ -27,11 +27,14 @@ export type FormAction =
     }
   | { type: "SET_ERRORS"; errors: Record<string, string> }
   | { type: "SUBMIT_START" }
+  | { type: "RESTORE_PENDING"; state: FormState }
   | { type: "SUBMIT_SUCCESS" }
   | { type: "SUBMIT_ERROR"; message: string };
 
 export function formReducer(state: FormState, action: FormAction): FormState {
   switch (action.type) {
+    case "RESTORE_PENDING":
+      return { ...action.state, status: "error", errors: {} };
     case "SET_FIELD":
       return {
         ...state,

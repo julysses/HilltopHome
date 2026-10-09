@@ -56,6 +56,7 @@ export type LeadAnswers = {
 };
 
 export type GetOfferSubmitPayload = {
+  request_id?: string;
   answers: LeadAnswers;
   utm_source?: string;
   utm_campaign?: string;
