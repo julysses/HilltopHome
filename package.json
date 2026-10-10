@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
-    "test": "node tests/form-validation.mjs"
+    "test": "node --test tests/form-validation.mjs tests/attribution.mjs"
   },
   "dependencies": {
     "clsx": "^2.1.1",

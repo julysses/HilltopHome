@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import { SITE_NAME } from "@/lib/constants";
 import { SITE_URL_BASE } from "@/lib/seo";
 import "./globals.css";
+import { AttributionCapture } from "@/components/AttributionCapture";
 
 const inter = localFont({
   src: "./fonts/Inter-latin.woff2",
@@ -26,6 +27,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={inter.variable}>
       <body>
+        <AttributionCapture />
         {children}
       </body>
     </html>

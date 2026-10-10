@@ -76,9 +76,16 @@ const {savePendingInquiry,readPendingInquiry,clearPendingInquiry,receiptMatches,
 const records=new Map();
 const storage={getItem:key=>records.get(key)??null,setItem:(key,value)=>records.set(key,value),removeItem:key=>records.delete(key)};
 assert.equal(readPendingInquiry(storage),null);
-const draft=savePendingInquiry(storage,state,REFERENCE);
+const draft=savePendingInquiry(storage,{...state,utm_source:'facebook',utm_medium:'paid_social',utm_campaign:'october_launch'},REFERENCE);
 const recovered=readPendingInquiry(storage);
 assert.deepEqual(recovered.payload,draft.payload,'reload must recover identical reference, answers and UTMs');
+globalThis.fetch=async(_url,options)=>{
+ const body=JSON.parse(options.body);
+ assert.equal(body.utm_source,'facebook');assert.equal(body.utm_medium,'paid_social');assert.equal(body.utm_campaign,'october_launch');
+ return Response.json({success:true,submission_id:REFERENCE,processing_status:'processed'});
+};
+assert.equal((await POST(request(recovered.payload))).status,200,'recovered campaign must reach CRM unchanged');
+globalThis.fetch=originalFetch;
 assert.throws(()=>savePendingInquiry(storage,{...state,first_name:'Another'},'22222222-2222-4222-8222-222222222222'),'pending inquiry must not be overwritten');
 assert.equal(receiptMatches({success:true,submission_id:REFERENCE,processing_status:'processed'},recovered),true);
 assert.equal(receiptMatches({success:true,submission_id:'wrong',processing_status:'processed'},recovered),false);
