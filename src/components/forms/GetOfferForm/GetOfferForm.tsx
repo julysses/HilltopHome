@@ -25,6 +25,7 @@ function GetOfferFormInner({ variant = "embedded" }: GetOfferFormProps) {
   const [blocked, setBlocked] = useState(false);
   const draftRef = useRef<PendingInquiry | null>(null);
   const busy = useRef(false);
+  const formRef = useRef<HTMLDivElement>(null);
   useUtmCapture(dispatch);
 
   useEffect(() => {
@@ -49,6 +50,16 @@ function GetOfferFormInner({ variant = "embedded" }: GetOfferFormProps) {
       const errors = validateAll(state);
       if (Object.keys(errors).length > 0) {
         dispatch({ type: "SET_ERRORS", errors });
+        // On a long mobile form, inline errors can be above the submit button.
+        // Bring the first missing answer into view instead of appearing inert.
+        const firstField = Object.keys(errors)[0];
+        window.requestAnimationFrame(() => {
+          const field = formRef.current?.querySelector<HTMLElement>(
+            `[id="${firstField}"], [name="${firstField}"]`,
+          );
+          field?.focus({ preventScroll: true });
+          field?.scrollIntoView({ block: "center", behavior: "auto" });
+        });
         return;
       }
     }
@@ -108,7 +119,7 @@ function GetOfferFormInner({ variant = "embedded" }: GetOfferFormProps) {
   }
 
   return (
-    <div className="mx-auto w-full max-w-xl rounded-lg border border-black/10 bg-white p-6 shadow-sm sm:p-8">
+    <div ref={formRef} className="mx-auto w-full max-w-xl rounded-lg border border-black/10 bg-white p-6 shadow-sm sm:p-8">
       {variant === "standalone" && (
         <h1 className="mb-6 text-2xl font-extrabold uppercase tracking-wide text-text sm:text-3xl">
           Get Your Cash Offer
@@ -133,6 +144,16 @@ function GetOfferFormInner({ variant = "embedded" }: GetOfferFormProps) {
       )}
 
       <div className="mt-8">
+        {Object.values(state.errors).some(Boolean) && (
+          <div role="alert" className="mb-4 rounded-md border border-primary/30 bg-primary/5 p-4 text-sm text-primary">
+            <p className="font-semibold">Please complete the required answers before submitting:</p>
+            <ul className="mt-2 list-inside list-disc">
+              {Object.entries(state.errors).filter(([, message]) => Boolean(message)).map(([field, message]) => (
+                <li key={field}>{message}</li>
+              ))}
+            </ul>
+          </div>
+        )}
         <Button
           type="button"
           onClick={handleSubmit}
