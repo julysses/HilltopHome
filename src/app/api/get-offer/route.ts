@@ -41,6 +41,7 @@ export async function POST(request: Request) {
   // Store the server-controlled disclosure with the durable CRM receipt.
   const wholesaleBody = {
     request_id: payload.request_id,
+    turnstile_token: payload.turnstile_token,
     answers: {
       ...payload.answers,
       sms_opt_in: payload.answers.sms_opt_in === true,
@@ -64,6 +65,14 @@ export async function POST(request: Request) {
     });
   } catch {
     return NextResponse.json({ success: false, error: "Upstream request failed" }, { status: 502 });
+  }
+
+  if (upstreamRes.status === 403 || upstreamRes.status === 503) {
+    const rejection = await upstreamRes.json().catch(() => null);
+    const code = rejection?.detail?.code;
+    if (code === "website_challenge_required" || code === "website_challenge_unavailable") {
+      return NextResponse.json({ success: false, code }, { status: upstreamRes.status });
+    }
   }
 
   if (!upstreamRes.ok) {

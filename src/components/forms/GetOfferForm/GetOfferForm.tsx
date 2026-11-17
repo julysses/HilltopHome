@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useEffect, useReducer, useRef, useState } from "react";
+import { WebsiteChallenge } from "../WebsiteChallenge";
 import { Button } from "@/components/ui/Button";
 import { formReducer, initialFormState } from "./formReducer";
 import { useUtmCapture } from "./useUtmCapture";
@@ -13,6 +14,8 @@ import { ConsentSection } from "./ConsentSection";
 import { ConfirmationState } from "./ConfirmationState";
 import { SubmitError } from "./SubmitError";
 
+const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_WEBSITE_TURNSTILE_SITE_KEY;
+
 type GetOfferFormProps = {
   variant?: "embedded" | "standalone";
 };
@@ -23,6 +26,9 @@ function GetOfferFormInner({ variant = "embedded" }: GetOfferFormProps) {
   const [pending, setPending] = useState<PendingInquiry | null>(null);
   const [ready, setReady] = useState(false);
   const [blocked, setBlocked] = useState(false);
+  const [challengeToken, setChallengeToken] = useState<string | null>(null);
+  const [challengeAttempt, setChallengeAttempt] = useState(0);
+  const needsChallenge = Boolean(TURNSTILE_SITE_KEY && !challengeToken);
   const draftRef = useRef<PendingInquiry | null>(null);
   const busy = useRef(false);
   const formRef = useRef<HTMLDivElement>(null);
@@ -64,6 +70,8 @@ function GetOfferFormInner({ variant = "embedded" }: GetOfferFormProps) {
       }
     }
 
+    if (needsChallenge) return;
+
     busy.current = true;
     let draft = draftRef.current;
     if (!draft) {
@@ -85,11 +93,23 @@ function GetOfferFormInner({ variant = "embedded" }: GetOfferFormProps) {
       const res = await fetch("/api/get-offer", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(draft.payload),
+        body: JSON.stringify({ ...draft.payload, turnstile_token: challengeToken ?? undefined }),
         signal: AbortSignal.timeout(40_000),
       });
 
       if (!res.ok) {
+        const rejection = await res.json().catch(() => null);
+        if (rejection?.code === "website_challenge_required" || rejection?.code === "website_challenge_unavailable") {
+          if (isFirstAttempt) {
+            clearPendingInquiry(window.sessionStorage, draft);
+            draftRef.current = null;
+            setPending(null);
+          }
+          dispatch({ type: "SUBMIT_ERROR", message: TURNSTILE_SITE_KEY
+            ? "Complete a new verification and try again."
+            : "Verification settings changed. Reload this page and try again." });
+          return;
+        }
         // Only a first, definite pre-write validation rejection releases editing.
         // A retry may refer to an inquiry saved before its acknowledgement was lost.
         if (isFirstAttempt && (res.status === 400 || res.status === 422)) {
@@ -111,7 +131,11 @@ function GetOfferFormInner({ variant = "embedded" }: GetOfferFormProps) {
       dispatch({ type: "SUBMIT_SUCCESS" });
     } catch {
       dispatch({ type: "SUBMIT_ERROR", message: UNCERTAIN_INQUIRY_MESSAGE });
-    } finally { busy.current = false; }
+    } finally {
+      busy.current = false;
+      setChallengeToken(null);
+      setChallengeAttempt(value => value + 1);
+    }
   }
 
   if (state.status === "success") {
@@ -137,9 +161,13 @@ function GetOfferFormInner({ variant = "embedded" }: GetOfferFormProps) {
         <ConsentSection state={state} dispatch={dispatch} />
       </fieldset>
 
+      {TURNSTILE_SITE_KEY && <div className="mt-6">
+        <WebsiteChallenge key={challengeAttempt} siteKey={TURNSTILE_SITE_KEY} action="hilltop-home-co" onToken={setChallengeToken} />
+      </div>}
+
       {state.status === "error" && state.submitErrorMessage && (
         <div className="mt-6">
-          <SubmitError message={state.submitErrorMessage} onRetry={handleSubmit} disabled={blocked || !ready} />
+          <SubmitError message={state.submitErrorMessage} onRetry={handleSubmit} disabled={blocked || !ready || needsChallenge} />
         </div>
       )}
 
@@ -157,7 +185,7 @@ function GetOfferFormInner({ variant = "embedded" }: GetOfferFormProps) {
         <Button
           type="button"
           onClick={handleSubmit}
-          disabled={!ready || blocked || state.status === "submitting"}
+          disabled={!ready || blocked || needsChallenge || state.status === "submitting"}
           className="w-full"
         >
           {state.status === "submitting" ? "Submitting..." : pending ? "Retry Saved Inquiry" : "Get My Offer"}

@@ -108,3 +108,17 @@ assert.equal((await POST(request(toSubmitPayload(state)))).status,502);
 globalThis.fetch=originalFetch;
 assert.equal((await POST(request({...toSubmitPayload(state),request_id:'invalid'}))).status,400);
 console.log('PASS: request reference forwarded and incorrect or unfinished acknowledgements rejected.');
+
+globalThis.fetch = async (_url, options) => {
+  const body = JSON.parse(options.body);
+  assert.equal(body.turnstile_token, 'synthetic-token');
+  assert.equal(body.answers.turnstile_token, undefined);
+  return Response.json({detail:{code:'website_challenge_required'}}, {status:403});
+};
+try {
+  const response = await POST(request({...toSubmitPayload(state), turnstile_token:'synthetic-token'}));
+  assert.equal(response.status, 403);
+  assert.deepEqual(await response.json(), {success:false, code:'website_challenge_required'});
+} finally {
+  globalThis.fetch = originalFetch;
+}

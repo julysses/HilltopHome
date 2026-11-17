@@ -57,6 +57,7 @@ export type LeadAnswers = {
 
 export type GetOfferSubmitPayload = {
   request_id?: string;
+  turnstile_token?: string;
   answers: LeadAnswers;
   utm_source?: string;
   utm_campaign?: string;
